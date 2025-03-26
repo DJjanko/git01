@@ -73,14 +73,47 @@ def zmanjsaj_sliko(image, sirina, visina):
     #print("Sirina: ", sirina, ' ', "Visina: ", visina)
     return cv.resize(image, (sirina, visina))
 
-
+#pogleda če je vrednost znotraj nižje in višje vrednosti
 def is_between(value, lower, upper):
+    return lower <= value <= upper
 
 
+#za vsak položaj slike se naredi škatla v za katero se prešteje koliko pokslov je barve kože
+#vrne polje [[koordinata x, koordinatay y, število pikslov barve]...]
 def obdelaj_sliko_s_skatlami(image, sirina_skatle, visina_skatle, color):
+    imgVisina, imgSirina = image.shape[:2]
+
+    data = []
+
+    for x in range(0, imgSirina, sirina_skatle):
+        for y in range(0, imgVisina, visina_skatle):
+            subimage = image[y:y + visina_skatle, x:x + sirina_skatle]
+            counter=prestej_piksle_z_barvo_koze(subimage,color)
+            row = [x,y, counter]
+            data.append(row)
+
+    array = np.array(data)
+
+    return array
 
 
+#za vsako škatlo/sliko, ki pride prešteje koliko pikslov je barve kože
 def prestej_piksle_z_barvo_koze(image,color):
+    imgVisina, imgSirina = image.shape[:2]
+
+    colorBs, colorGs, colorRs = color[0]
+    colorBe, colorGe, colorRe = color[1]
+
+    counter = 0
+
+    for i in range(imgSirina):
+        for j in range(imgVisina):
+            if (is_between(image[j, i, 0], colorBs, colorBe) and
+                    is_between(image[j, i, 1], colorGs, colorGe) and
+                    is_between(image[j, i, 2], colorRs, colorRe)):
+                counter += 1
+
+    return counter
 
 
 def display_frames(image, fps):
