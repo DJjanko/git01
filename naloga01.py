@@ -116,7 +116,10 @@ def prestej_piksle_z_barvo_koze(image,color):
     return counter
 
 
+#zgoraj levo doda zelen text, ki pove koliko sličic na sekudno
 def display_frames(image, fps):
+    fps_str = f"FPS: {fps:.2f}"
+    cv.putText(image,fps_str,(10,10),cv.FONT_HERSHEY_SIMPLEX,0.2, (0,255,0),1)
 
 
 if __name__ == '__main__':
