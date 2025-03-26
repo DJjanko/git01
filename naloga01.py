@@ -120,3 +120,90 @@ def display_frames(image, fps):
 
 
 if __name__ == '__main__':
+    #preveri kamero, izberemo kvadrat
+    kamera = cv.VideoCapture(0)
+    if not kamera.isOpened():
+        print('Kamera ni bila odprta.')
+    else:
+        selected = True
+        ret, image = kamera.read()
+        while selected:
+            cv.imshow('image', image)
+            cv.setMouseCallback('image', click_event)
+            cv.waitKey(500)
+        kamera.release()
+        cv.destroyAllWindows()
+
+
+    #selected = True
+    #image = cv.imread('Lenna.png', 1)
+    #while selected:
+    #    cv.imshow('image', image)
+    #    cv.setMouseCallback('image', click_event)
+    #    cv.waitKey(500)
+    #cv.destroyAllWindows()
+
+    #image = cv.imread('Lenna.png', 1)
+
+    #doloci barvo koze
+    kamera = cv.VideoCapture(0)
+    ret,image = kamera.read()
+    color = doloci_barvo_koze(image, coordinates[0], coordinates[1])
+    print(color)
+    kamera.release()
+
+    #image = zmanjsaj_sliko(image, 240, 320)
+    #cv.imshow('image', image)
+    #cv.waitKey(0)
+    #cv.destroyAllWindows()
+
+    #----------------------------
+
+    #začne timer
+    kamera = cv.VideoCapture(0)
+    start_time = time.time()
+    num_frames = 0
+
+    #v zanki gledamo na kameri sliko, ki jo damo v škatle in preštejemo piksle,kože
+    # tista škatla, ki ima največ preštetih pikslov in ima vsaj 50% pikslov kože glede na vseh pikslov v škatli
+    # je izbrana kot škatla v kateri, bi se naj nahajal obraz
+    # Prikažejo se slike sosedstvo 8, če je možno (če ni na robu slike), doda se še text za fps
+    if not kamera.isOpened():
+        print("Kamera ni odprta")
+    else:
+        while True:
+            ret, image = kamera.read()
+            image = zmanjsaj_sliko(image,240,320)
+
+            imgVisina, imgSirina = image.shape[:2]
+            frame_width = int(imgSirina * 0.2)
+            frame_height = int(imgVisina * 0.2)
+
+            array = obdelaj_sliko_s_skatlami(image, frame_width, frame_height, color)
+            max_counter = np.max(array[:, 2])
+            # print(array)
+
+            xs, xe, ys, ye = 0,0,0,0
+            counter = 0
+            for x in array:
+                if x[2] > int(0.5 * frame_width * frame_height) and x[2] == max_counter:
+
+                    xs = max(0, x[0]-frame_width)
+                    xe = min(imgSirina, x[0]+frame_width+frame_width)
+                    ys = max(0, x[1]-frame_height)
+                    ye = min(imgVisina, x[1]+frame_height +frame_height)
+                    #print(xs, ys, " ", xe, ye)
+
+                    num_frames += 1
+                    elapsed_time = time.time() - start_time
+                    fps = num_frames / elapsed_time
+
+                    roi = image[ys:ye, xs:xe]
+                    display_frames(roi, fps)
+                    cv.imshow('roi', roi)
+
+            if cv.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        kamera.release()
+        cv.destroyAllWindows()
