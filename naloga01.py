@@ -210,3 +210,4 @@ if __name__ == '__main__':
 
         kamera.release()
         cv.destroyAllWindows()
+        #asdasdasd
